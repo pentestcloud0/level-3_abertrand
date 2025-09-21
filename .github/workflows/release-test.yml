@@ -1,0 +1,22 @@
+name: Test new release
+
+on:
+  workflow_run:
+    workflows: ["Auto-release on main"]
+    types:
+      - completed
+
+jobs:
+  test-release:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    env:
+      FORCE_COLOR: 1
+      FLAG: ${{ secrets.FLAG }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Verify released binary
+        run: |
+          gh release download --pattern "hello" -R ${{ github.repository }}
+          chmod +x hello
+          ./hello
